@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>together — 狗狗友善住宿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green-dark:#1C3C2A;
+  --green-mid:#2D5A3D;
+  --green-accent:#3D7A52;
+  --green-light:#E8F0EB;
+  --cream:#FAF8F4;
+  --text-dark:#1A1A1A;
+  --text-mid:#4A4A4A;
+  --text-light:#8A8A8A;
+  --border:#E0DDD8;
+  --white:#FFFFFF;
+  --shadow:0 2px 20px rgba(0,0,0,0.08);
+}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--text-dark);min-height:100vh}
+
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:72px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--green-dark);cursor:pointer}
+.logo-icon{width:36px;height:36px;background:var(--green-dark);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;fill:white}
+.nav-search{display:flex;align-items:center;background:var(--white);border:1.5px solid var(--border);border-radius:40px;overflow:hidden;box-shadow:var(--shadow)}
+.nav-search-field{padding:10px 20px;font-size:14px;color:var(--text-dark);border:none;outline:none;background:transparent;font-family:'Noto Sans TC',sans-serif;cursor:pointer}
+.nav-search-field:not(:last-child){border-right:1px solid var(--border)}
+.nav-search-btn{background:var(--green-dark);border:none;padding:10px 16px;cursor:pointer;display:flex;align-items:center;border-radius:0 40px 40px 0}
+.nav-search-btn svg{width:18px;height:18px;fill:white}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-light);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--green-dark);font-weight:700}
+
+.page{display:none}
+.page.active{display:block}
+
+.hero{position:relative;min-height:560px;background:linear-gradient(180deg,var(--green-light) 0%, var(--cream) 100%);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 48px}
+.hero-title{font-family:'Noto Serif TC',serif;font-size:64px;font-weight:700;color:var(--green-dark);text-align:center;margin-bottom:40px;position:relative;z-index:2}
+.hero-dogs{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:700px;opacity:0.15;pointer-events:none}
+.search-bar{background:var(--white);border:1.5px solid var(--border);border-radius:60px;display:flex;align-items:center;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,0.12);position:relative;z-index:2;max-width:680px;width:100%}
+.search-field{flex:1;padding:18px 24px;border:none;outline:none;font-size:15px;font-family:'Noto Sans TC',sans-serif;background:transparent;cursor:pointer}
+.search-label{font-size:11px;color:var(--text-light);display:block;margin-bottom:2px}
+.search-value{font-size:15px;color:var(--text-dark)}
+.search-divider{width:1px;height:40px;background:var(--border)}
+.search-btn{background:var(--green-dark);border:none;width:56px;height:56px;border-radius:50%;margin:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.2s}
+.search-btn:hover{background:var(--green-accent)}
+.search-btn svg{width:22px;height:22px;fill:white}
+
+.section{padding:48px 48px 0}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.section-title{font-size:22px;font-weight:700;color:var(--text-dark)}
+.section-arrow{background:none;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.section-arrow svg{width:16px;height:16px;stroke:var(--text-dark);fill:none}
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+.card-img{width:100%;height:200px;object-fit:cover;background:var(--green-light);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-img-placeholder{font-size:48px;opacity:0.4}
+.card-body{padding:14px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.card-name{font-size:16px;font-weight:700;color:var(--text-dark)}
+.card-rating{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text-dark);font-weight:500}
+.card-rating svg{width:14px;height:14px;fill:var(--green-dark)}
+.card-location{font-size:13px;color:var(--text-mid);margin-bottom:8px}
+.card-desc{font-size:12px;color:var(--text-mid);margin-bottom:10px;line-height:1.5}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.tag-green{background:var(--green-light);color:var(--green-dark)}
+.tag-type{background:#F0EDE8;color:var(--text-mid)}
+
+.footer{background:var(--green-dark);color:white;padding:60px 48px 40px;margin-top:60px}
+.footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand{font-size:18px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.footer-desc{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6}
+.footer-col-title{font-size:14px;font-weight:700;margin-bottom:16px;color:var(--green-light)}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-links li a{font-size:13px;color:rgba(255,255,255,0.7);text-decoration:none}
+.footer-links li a:hover{color:white}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.1);padding-top:24px;font-size:12px;color:rgba(255,255,255,0.4)}
+
+.results-page{padding:0 48px}
+.results-layout{display:grid;grid-template-columns:220px 1fr;gap:32px;padding-top:32px}
+.results-header{display:flex;justify-content:flex-end;padding:24px 0 0;font-size:15px;font-weight:700}
+.filter-panel{position:sticky;top:88px;align-self:start}
+.filter-title{font-size:15px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.filter-section{margin-bottom:24px}
+.filter-section-title{font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.filter-tags{display:flex;flex-wrap:wrap;gap:6px}
+.filter-tag{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:var(--white);color:var(--text-mid);transition:all 0.15s}
+.filter-tag:hover,.filter-tag.active{background:var(--green-dark);color:white;border-color:var(--green-dark)}
+.results-grid{display:flex;flex-direction:column;gap:0}
+.result-card{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid var(--border);padding:24px 0;cursor:pointer;transition:background 0.15s;gap:20px}
+.result-card:hover{background:var(--green-light);padding-left:8px;border-radius:8px;margin:0 -8px;padding-right:8px}
+.result-img{width:100%;height:150px;border-radius:12px;object-fit:cover;background:var(--green-light)}
+.result-info{flex:1}
+.result-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.result-sub{font-size:13px;color:var(--text-mid);margin-bottom:12px}
+.result-features{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.feature-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid)}
+.feature-row svg{width:16px;height:16px;stroke:var(--green-dark);fill:none;flex-shrink:0}
+.result-bottom{display:flex;justify-content:space-between;align-items:center}
+.result-tags{display:flex;gap:6px;flex-wrap:wrap}
+.result-rating{font-size:14px;font-weight:700;display:flex;align-items:center;gap:4px}
+
+.detail-page{max-width:1200px;margin:0 auto;padding:32px 48px}
+.detail-grid{display:grid;grid-template-columns:1fr 380px;gap:48px}
+.main-img{width:100%;height:450px;border-radius:16px;object-fit:cover;background:var(--green-light);margin-bottom:16px;display:flex;align-items:center;justify-content:center;font-size:64px;overflow:hidden}
+.main-img img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.thumb-row{display:flex;gap:8px}
+.thumb{width:80px;height:60px;border-radius:8px;object-fit:cover;background:var(--green-light);cursor:pointer;border:2px solid transparent;flex-shrink:0;overflow:hidden}
+.thumb.active{border-color:var(--green-dark)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.detail-panel{position:sticky;top:88px;align-self:start}
+.detail-name{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:700;margin-bottom:8px}
+.detail-sub{font-size:14px;color:var(--text-mid);margin-bottom:16px}
+.detail-rating{display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.paw{font-size:18px}
+.detail-price{font-size:32px;font-weight:700;color:var(--green-dark);margin-bottom:24px}
+.detail-price span{font-size:14px;font-weight:400;color:var(--text-mid)}
+.detail-features{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 0;margin-bottom:20px;display:flex;flex-direction:column;gap:12px}
+.detail-feature{display:flex;align-items:center;gap:10px;font-size:14px}
+.detail-feature svg{width:18px;height:18px;stroke:var(--green-dark);fill:none;flex-shrink:0}
+.section-subtitle{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;margin:28px 0 16px}
+.rules-list{display:flex;flex-direction:column;gap:8px}
+.rule-item{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-mid)}
+.rule-item svg{width:16px;height:16px;flex-shrink:0}
+.map-box{background:var(--green-light);border-radius:12px;height:200px;display:flex;align-items:center;justify-content:center;color:var(--green-dark);font-size:13px;margin-top:16px}
+.book-btn{width:100%;padding:16px;background:var(--green-dark);color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:background 0.2s;margin-top:16px}
+.book-btn:hover{background:var(--green-accent)}
+.loading{text-align:center;padding:60px;color:var(--text-light);font-size:15px}
+.dog-size-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;background:var(--green-light);color:var(--green-dark)}
+
+.search-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding-top:80px}
+.search-modal.open{display:flex}
+.search-modal-box{background:var(--white);border-radius:24px;padding:32px;width:600px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:24px}
+.modal-field{margin-bottom:16px}
+.modal-label{font-size:12px;color:var(--text-light);margin-bottom:6px}
+.modal-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'Noto Sans TC',sans-serif;outline:none}
+.modal-input:focus{border-color:var(--green-dark)}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.btn-secondary{padding:10px 20px;border:1px solid var(--border);border-radius:10px;background:var(--white);cursor:pointer;font-size:14px;font-family:'Noto Sans TC',sans-serif}
+.btn-primary{padding:10px 24px;border:none;background:var(--green-dark);color:white;border-radius:10px;cursor:pointer;font-size:14px;font-family:'Noto Sans TC',sans-serif;font-weight:500}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showPage('home')">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 9c0-1.1.9-2 2-2h1V5a2 2 0 114 0v2h4V5a2 2 0 114 0v2h1a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+    </div>
+    together
+  </div>
+  <div class="nav-search" id="navSearch" onclick="openSearchModal()">
+    <div class="nav-search-field">
+      <div class="search-label">地點</div>
+      <div class="search-value" id="navLocation">搜尋目的地</div>
+    </div>
+    <div class="nav-search-field">
+      <div class="search-label">日期</div>
+      <div class="search-value" id="navDate">選擇日期</div>
+    </div>
+    <div class="nav-search-field">
+      <div class="search-label">旅客</div>
+      <div class="search-value" id="navGuest">新增數量</div>
+    </div>
+    <button class="nav-search-btn">
+      <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-avatar">🐕</div>
+    <div style="cursor:pointer;padding:8px">☰</div>
+  </div>
+</nav>
+
+<div id="homePage" class="page active">
+  <div class="hero">
+    <div class="hero-title">要去，一起去</div>
+    <div class="search-bar">
+      <div class="search-field" onclick="openSearchModal()">
+        <div class="search-label">地點</div>
+        <div class="search-value">搜尋目的地</div>
+      </div>
+      <div class="search-divider"></div>
+      <div class="search-field" onclick="openSearchModal()">
+        <div class="search-label">日期</div>
+        <div class="search-value">選擇日期</div>
+      </div>
+      <div class="search-divider"></div>
+      <div class="search-field" onclick="openSearchModal()">
+        <div class="search-label">旅客</div>
+        <div class="search-value">新增數量</div>
+      </div>
+      <button class="search-btn" onclick="doSearch()">
+        <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">台北近郊</div>
+      <button class="section-arrow">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="cards-row" id="nearbyCards"></div>
+  </div>
+
+  <div class="section" style="margin-top:48px">
+    <div class="section-header">
+      <div class="section-title">大型狗友善</div>
+      <button class="section-arrow">
+        <svg viewBox="0 0 24 24" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="cards-row" id="largeCards"></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">🐾 together</div>
+        <div class="footer-desc">收錄全台歡迎寵物的店家，找到適合你家狗狗的友善住宿。</div>
+      </div>
+      <div>
+        <div class="footer-col-title">關於我們</div>
+        <ul class="footer-links">
+          <li><a href="#">我們的理念</a></li>
+          <li><a href="#">房源政策</a></li>
+          <li><a href="#">狗狗旅行守則</a></li>
+          <li><a href="#">聯絡我們</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">合作夥伴</div>
+        <ul class="footer-links">
+          <li><a href="#">申請成為狗狗友善房源</a></li>
+          <li><a href="#">申請成為評鑑員</a></li>
+          <li><a href="#">狗狗保姆</a></li>
+          <li><a href="#">狗狗友善計程車</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2024 together. 讓毛孩也能一起旅行。</div>
+  </footer>
+</div>
+
+<div id="resultsPage" class="page">
+  <div class="results-header">
+    <span id="resultsCount"></span>
+  </div>
+  <div class="results-layout">
+    <div class="filter-panel">
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px">
+        <div class="filter-title">條件篩選 🔧</div>
+        <div class="filter-section">
+          <div class="filter-section-title">狗狗大小 <span>∨</span></div>
+          <div class="filter-tags">
+            <span class="filter-tag" onclick="toggleFilter(this,'small')">小型犬（&lt;10kg）</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'medium')">中型犬（10-25kg）</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'large')">大型犬（&gt;25kg）</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-title">住宿需求 <span>∨</span></div>
+          <div class="filter-tags">
+            <span class="filter-tag" onclick="toggleFilter(this,'furniture')">可上家具</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'lawn')">有草地區</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'park')">附近有公園</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'dogpark')">狗狗公園</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'restaurant')">可到餐廳</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'bowl')">提供水碗</span>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-title">住宿類型 <span>∨</span></div>
+          <div class="filter-tags">
+            <span class="filter-tag" onclick="toggleFilter(this,'type_民宿')">獨棟民宿</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'type_公寓')">公寓</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'type_飯店')">飯店</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'type_渡假木屋')">渡假木屋</span>
+            <span class="filter-tag" onclick="toggleFilter(this,'type_營區')">營區</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="resultsList" class="results-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="detailPage" class="page">
+  <div class="detail-page">
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div class="search-modal" id="searchModal">
+  <div class="search-modal-box">
+    <div class="modal-title">搜尋狗狗友善住宿</div>
+    <div class="modal-field">
+      <div class="modal-label">地點</div>
+      <input class="modal-input" id="inputLocation" placeholder="搜尋目的地，如：宜蘭、花蓮..." type="text">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">入住日期</div>
+      <input class="modal-input" id="inputDate" type="date">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">旅客與狗狗</div>
+      <input class="modal-input" id="inputGuest" placeholder="例：2人，1中型狗" type="text">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSearchModal()">取消</button>
+      <button class="btn-primary" onclick="doSearch()">🔍 搜尋</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NOTION_DB_ID = '3765d300-73ed-8005-89aa-000b6e97328a';
+let allHotels = [];
+let activeFilters = new Set();
+
+const dogImages = [
+  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=280&fit=crop',
+  'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=280&fit=crop',
+  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=280&fit=crop',
+  'https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=400&h=280&fit=crop',
+  'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=280&fit=crop',
+  'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&h=280&fit=crop',
+];
+
+async function loadNotionData() {
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a data assistant. The user will ask you to return hotel data from a Notion database. 
+Return ONLY a valid JSON array, no markdown, no explanation. 
+Use this exact format for each hotel:
+[{"id":"page_id","name":"旅宿業者","type":"物件類型","dogSize":"接受狗狗大小","rating":5,"price":"狗狗費用","furniture":"可以上家具","lawn":"園內有狗狗草地區","park":"附近有公園","dogpark":"附近有狗狗公園","restaurant":"可以到餐廳區","bowl":"提供水碗","address":"地址","website":"網頁","dogArea":"狗狗在是否能在全區落地"}]`,
+        messages: [{
+          role: 'user',
+          content: `Return the hotels from the Notion database as JSON array. Here is the data:
+Hotel1: id=3765d30073ed80f8bda3cb5e6b9cf3d5, 旅宿業者=Hotel1, 物件類型=獨棟民宿, 接受狗狗大小=小, 狗狗友善評分等級=4, 狗狗費用=100, 可以上家具=可, 園內有狗狗草地區=無, 附近有公園=是, 附近有狗狗公園=否, 可以到餐廳區=是, 提供水碗=是, 地址=, 狗狗在是否能在全區落地=否
+Hotel2: id=3765d30073ed804cbe50c0e134acdbd0, 旅宿業者=Hotel2, 物件類型=營區, 接受狗狗大小=大、中、小, 狗狗友善評分等級=5, 狗狗費用=無, 可以上家具=否, 園內有狗狗草地區=有, 附近有公園=是, 附近有狗狗公園=是, 可以到餐廳區=是, 提供水碗=是, 地址=, 狗狗在是否能在全區落地=是`
+        }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '[]';
+    return JSON.parse(text.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    return getFallbackData();
+  }
+}
+
+function getFallbackData() {
+  return [
+    {id:'hotel1',name:'Hotel1',type:'獨棟民宿',dogSize:'小',rating:4,price:'100',furniture:'可',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'台北, 新北市',dogArea:'否'},
+    {id:'hotel2',name:'Hotel2',type:'營區',dogSize:'大、中、小',rating:5,price:'免費',furniture:'否',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'新北市',dogArea:'是'},
+    {id:'sample1',name:'汪汪漫旅 — 宜蘭民宿',type:'獨棟民宿',dogSize:'大、中、小',rating:4.8,price:'2800',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'金山, 新北市',dogArea:'是'},
+    {id:'sample2',name:'毛孩天堂 — 花蓮山莊',type:'渡假木屋',dogSize:'中、小',rating:4.5,price:'3500',furniture:'可',lawn:'有',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'花蓮市',dogArea:'是'},
+    {id:'sample3',name:'森林小屋',type:'渡假木屋',dogSize:'大、中、小',rating:4.7,price:'4200',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'否',bowl:'是',address:'南投縣',dogArea:'是'},
+    {id:'sample4',name:'海邊狗狗民宿',type:'獨棟民宿',dogSize:'小',rating:4.3,price:'1800',furniture:'否',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'屏東, 墾丁',dogArea:'否'},
+  ];
+}
+
+function ratingToPaws(rating) {
+  const full = Math.floor(rating);
+  return '🐾'.repeat(Math.min(full,5));
+}
+
+function makeCard(hotel, idx) {
+  const imgUrl = dogImages[idx % dogImages.length];
+  const tags = [];
+  if(hotel.dogArea === '是') tags.push('<span class="tag tag-green">全區落地</span>');
+  if(hotel.lawn === '有') tags.push('<span class="tag tag-green">有草地</span>');
+  if(hotel.dogpark === '是') tags.push('<span class="tag tag-green">狗狗公園</span>');
+  tags.push(`<span class="tag tag-type">${hotel.type||'民宿'}</span>`);
+  
+  return `<div class="card" onclick="showDetail('${hotel.id}')">
+    <div class="card-img"><img src="${imgUrl}" alt="${hotel.name}" loading="lazy" onerror="this.parentElement.innerHTML='🐕'"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-name">${hotel.name}</div>
+        <div class="card-rating">🐾 ${hotel.rating}</div>
+      </div>
+      <div class="card-location">${hotel.address||'台灣'}</div>
+      <div class="card-desc">接受：${hotel.dogSize||'大、中、小'}</div>
+      <div class="card-tags">${tags.join('')}</div>
+    </div>
+  </div>`;
+}
+
+function makeResultCard(hotel, idx) {
+  const imgUrl = dogImages[idx % dogImages.length];
+  const features = [];
+  if(hotel.dogSize) features.push(`<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>接受狗狗大小：${hotel.dogSize}</div>`);
+  if(hotel.dogArea==='是') features.push(`<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 12l18 0M3 6l18 0M3 18l18 0"/></svg>公共區域可落地</div>`);
+  if(hotel.lawn==='有') features.push(`<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>附設草皮活動區</div>`);
+  if(hotel.dogpark==='是') features.push(`<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>距離附近狗狗公園 13 分鐘</div>`);
+
+  return `<div class="result-card" onclick="showDetail('${hotel.id}')">
+    <img class="result-img" src="${imgUrl}" alt="${hotel.name}" loading="lazy" onerror="this.src=''">
+    <div class="result-info">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="result-name">${hotel.name}</div>
+          <div class="result-sub">${hotel.address||'台灣'} · ${hotel.type||'民宿'}</div>
+        </div>
+        <div class="result-rating">🐾 ${hotel.rating}</div>
+      </div>
+      <div class="result-features">${features.join('')}</div>
+      <div class="result-bottom">
+        <div class="result-tags">
+          ${hotel.dogArea==='是'?'<span class="tag tag-green">全區落地</span>':''}
+          ${hotel.lawn==='有'?'<span class="tag tag-green">有草地</span>':''}
+          ${hotel.park==='是'?'<span class="tag tag-green">近公園</span>':''}
+          ${hotel.restaurant==='是'?'<span class="tag tag-green">可到餐廳</span>':''}
+        </div>
+        <div style="font-size:15px;font-weight:700;color:var(--green-dark)">
+          ${hotel.price&&hotel.price!=='無'&&hotel.price!=='免費'?'$'+hotel.price+' <span style="font-size:12px;font-weight:400;color:var(--text-light)">/晚</span>':'免費入住'}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderHome() {
+  const nearby = allHotels.slice(0, 4);
+  const large = allHotels.filter(h => h.dogSize && (h.dogSize.includes('大') || h.dogSize === '大、中、小')).slice(0,4);
+  
+  document.getElementById('nearbyCards').innerHTML = nearby.map((h,i)=>makeCard(h,i)).join('') || '<div class="loading">載入中...</div>';
+  document.getElementById('largeCards').innerHTML = large.length ? large.map((h,i)=>makeCard(h,i)).join('') : nearby.map((h,i)=>makeCard(h,i)).join('');
+}
+
+function renderResults(hotels) {
+  document.getElementById('resultsCount').textContent = `${hotels.length} 個結果`;
+  document.getElementById('resultsList').innerHTML = hotels.map((h,i)=>makeResultCard(h,i)).join('') || '<div class="loading">沒有符合條件的結果</div>';
+}
+
+function showDetail(id) {
+  const hotel = allHotels.find(h=>h.id===id) || allHotels[0];
+  if(!hotel) return;
+  const imgs = dogImages.slice(0,4);
+  const thumbs = imgs.map((url,i)=>`<div class="thumb ${i===0?'active':''}" onclick="switchImg(this,'${url}')"><img src="${url}" alt=""></div>`).join('');
+  
+  const feats = [];
+  if(hotel.dogSize) feats.push(`<div class="detail-feature"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>寵物大小：${hotel.dogSize}</div>`);
+  if(hotel.dogArea==='是') feats.push(`<div class="detail-feature"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg>公共區域可落地</div>`);
+  if(hotel.lawn==='有') feats.push(`<div class="detail-feature"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>附設草皮活動區</div>`);
+  if(hotel.park==='是') feats.push(`<div class="detail-feature"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>附近有公園</div>`);
+  if(hotel.dogpark==='是') feats.push(`<div class="detail-feature"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>附近有狗狗公園</div>`);
+
+  const rules = [];
+  if(hotel.furniture==='可'||hotel.furniture==='是') rules.push(`<div class="rule-item"><svg viewBox="0 0 24 24" stroke="var(--green-dark)" stroke-width="1.5" fill="none"><path d="M5 13l4 4L19 7"/></svg>允許上家具（沙發、床）</div>`);
+  if(hotel.restaurant==='是') rules.push(`<div class="rule-item"><svg viewBox="0 0 24 24" stroke="var(--green-dark)" stroke-width="1.5" fill="none"><path d="M5 13l4 4L19 7"/></svg>可進入餐廳區</div>`);
+  if(hotel.bowl==='是') rules.push(`<div class="rule-item"><svg viewBox="0 0 24 24" stroke="var(--green-dark)" stroke-width="1.5" fill="none"><path d="M5 13l4 4L19 7"/></svg>提供水碗</div>`);
+  rules.push(`<div class="rule-item"><svg viewBox="0 0 24 24" stroke="var(--text-light)" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>請隨時清理排泄物</div>`);
+  rules.push(`<div class="rule-item"><svg viewBox="0 0 24 24" stroke="var(--text-light)" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>請繫好狗狗牽繩</div>`);
+
+  const priceDisplay = hotel.price && hotel.price!=='無' && hotel.price!=='免費' 
+    ? `$${hotel.price} <span>/ 晚</span>` 
+    : '<span style="font-size:16px">含房費（無額外寵物費）</span>';
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-grid">
+      <div>
+        <div class="main-img" id="mainImg"><img src="${imgs[0]}" alt="${hotel.name}" id="mainImgEl"></div>
+        <div class="thumb-row">${thumbs}</div>
+        <div class="section-subtitle">關於這個地方</div>
+        <p style="font-size:14px;color:var(--text-mid);line-height:1.8">
+          ${hotel.name} 是一個${hotel.type||'民宿'}，接受${hotel.dogSize||'各種大小'}的狗狗入住。
+          ${hotel.dogArea==='是'?'狗狗可以在全區自由落地，享受無拘束的旅行體驗。':''}
+          ${hotel.lawn==='有'?'園區附設狗狗專屬草皮區，讓毛孩盡情奔跑。':''}
+          歡迎帶著您的毛孩一起入住，享受難忘的寵物友善旅遊體驗。
+        </p>
+      </div>
+      <div class="detail-panel">
+        <div class="detail-name">${hotel.name}</div>
+        <div class="detail-sub">可容納多名旅客 · ${hotel.type||'獨棟別墅'}</div>
+        <div class="detail-rating">${ratingToPaws(hotel.rating)} <span style="font-size:14px;font-weight:700">${hotel.rating}</span> <span style="font-size:13px;color:var(--text-light)">(1000+)</span></div>
+        <div class="detail-price">${priceDisplay}</div>
+        <div class="detail-features">${feats.join('')}</div>
+        <div class="section-subtitle" style="margin-top:0">寵物守則</div>
+        <div class="rules-list">${rules.join('')}</div>
+        ${hotel.website ? `<a href="${hotel.website}" target="_blank" style="display:block;text-align:center;margin-top:12px;font-size:13px;color:var(--green-dark);text-decoration:none">🔗 查看官方網頁</a>` : ''}
+        <button class="book-btn" onclick="alert('預訂功能即將上線！')">立即預訂</button>
+        <div class="map-box">📍 地圖載入中... (${hotel.address||'台灣'})</div>
+      </div>
+    </div>
+  `;
+  showPage('detail');
+}
+
+function switchImg(thumb, url) {
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
+  thumb.classList.add('active');
+  document.getElementById('mainImgEl').src = url;
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(name+'Page').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function openSearchModal() {
+  document.getElementById('searchModal').classList.add('open');
+}
+
+function closeSearchModal() {
+  document.getElementById('searchModal').classList.remove('open');
+}
+
+function doSearch() {
+  const loc = document.getElementById('inputLocation')?.value || '';
+  const date = document.getElementById('inputDate')?.value || '';
+  const guest = document.getElementById('inputGuest')?.value || '';
+  
+  if(loc) document.getElementById('navLocation').textContent = loc;
+  if(date) document.getElementById('navDate').textContent = date;
+  if(guest) document.getElementById('navGuest').textContent = guest;
+  
+  closeSearchModal();
+  const filtered = filterHotels();
+  renderResults(filtered);
+  showPage('results');
+}
+
+function toggleFilter(el, key) {
+  el.classList.toggle('active');
+  if(activeFilters.has(key)) activeFilters.delete(key);
+  else activeFilters.add(key);
+  renderResults(filterHotels());
+}
+
+function filterHotels() {
+  if(activeFilters.size === 0) return allHotels;
+  return allHotels.filter(h => {
+    for(const f of activeFilters) {
+      if(f === 'small' && !h.dogSize?.includes('小')) return false;
+      if(f === 'medium' && !h.dogSize?.includes('中')) return false;
+      if(f === 'large' && !h.dogSize?.includes('大')) return false;
+      if(f === 'furniture' && h.furniture !== '可' && h.furniture !== '是') return false;
+      if(f === 'lawn' && h.lawn !== '有') return false;
+      if(f === 'park' && h.park !== '是') return false;
+      if(f === 'dogpark' && h.dogpark !== '是') return false;
+      if(f === 'restaurant' && h.restaurant !== '是') return false;
+      if(f === 'bowl' && h.bowl !== '是') return false;
+      if(f.startsWith('type_') && h.type !== f.replace('type_','')) return false;
+    }
+    return true;
+  });
+}
+
+document.getElementById('searchModal').addEventListener('click', function(e) {
+  if(e.target === this) closeSearchModal();
+});
+
+async function init() {
+  document.getElementById('nearbyCards').innerHTML = '<div class="loading" style="grid-column:1/-1">載入旅宿資料中...</div>';
+  allHotels = await loadNotionData();
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>
