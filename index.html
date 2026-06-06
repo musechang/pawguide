@@ -364,55 +364,113 @@ nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 48px
 </div>
 
 <script>
-var dogImages = [
-  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=280&fit=crop',
-  'https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=280&fit=crop',
-  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=280&fit=crop',
-  'https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=400&h=280&fit=crop',
-  'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400&h=280&fit=crop',
-  'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&h=280&fit=crop'
-];
 var allHotels = [];
 var activeFilters = new Set();
 
-/* ── 載入 Notion 資料 ── */
+/* ── 備用圖片（Notion 照片載入失敗時使用）── */
+var fallbackImgs = [
+  'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=420&fit=crop',
+  'https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&h=420&fit=crop',
+  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&h=420&fit=crop',
+  'https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=600&h=420&fit=crop',
+  'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=420&fit=crop',
+  'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&h=420&fit=crop'
+];
+
+/* ── 透過 Anthropic API + Notion MCP 載入旅宿資料（含照片網址）── */
 function loadData() {
   return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: 'Return ONLY valid JSON array, no markdown, no explanation. Format: [{"id":"","name":"","type":"","dogSize":"","rating":5,"price":"","furniture":"","lawn":"","park":"","dogpark":"","restaurant":"","bowl":"","address":"","website":"","dogArea":""}]',
-      messages: [{
-        role: 'user',
-        content: 'Return hotel JSON from: Hotel1: id=hotel1, 旅宿業者=Hotel1, 物件類型=獨棟民宿, 接受狗狗大小=小, 狗狗友善評分等級=4, 狗狗費用=100, 可以上家具=可, 草地區=無, 附近有公園=是, 狗狗公園=否, 餐廳=是, 水碗=是, 地址=新北市, 全區落地=否 | Hotel2: id=hotel2, 旅宿業者=Hotel2, 物件類型=營區, 接受狗狗大小=大中小, 狗狗友善評分等級=5, 狗狗費用=無, 家具=否, 草地區=有, 公園=是, 狗公園=是, 餐廳=是, 水碗=是, 地址=新北市, 全區落地=是'
-      }]
+      max_tokens: 4000,
+      system: [
+        'You are a data assistant. Use the Notion MCP tool to fetch all pages from the 旅宿業者資訊 database.',
+        'Database ID: 3765d300-73ed-8005-89aa-000b6e97328a',
+        'For EACH page, call notion-fetch to get its properties including 物件相片 (photo attachments).',
+        'The 物件相片 field contains file:// URLs that are Notion attachment references.',
+        'You MUST call notion-fetch on each page individually to retrieve signed/accessible image URLs.',
+        'After fetching all pages, return ONLY a valid JSON array with NO markdown, NO explanation.',
+        'Each item must have these exact keys:',
+        '{"id":"page_id","name":"旅宿業者","type":"物件類型","dogSize":"接受狗狗大小","rating":0,"price":"狗狗費用","furniture":"可以上家具","lawn":"園內有狗狗草地區","park":"附近有公園","dogpark":"附近有狗狗公園","restaurant":"可以到餐廳區","bowl":"提供水碗","address":"地址","website":"網頁","dogArea":"狗狗在是否能在全區落地","photos":["url1","url2"]}',
+        'For photos: extract all image URLs from 物件相片. If Notion returns signed URLs (https://), include them directly. If they are file:// references, still include the raw string — the client will handle fallback.',
+        'Return ONLY the JSON array. No other text.'
+      ].join('\n'),
+      messages: [{ role: 'user', content: 'Please fetch all hotels from the Notion database and return the JSON array with photo URLs.' }],
+      mcp_servers: [{ type: 'url', url: 'https://mcp.notion.com/mcp', name: 'notion' }]
     })
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
+    // MCP 回應可能包含多個 content block，找出最後一個 text block
     var text = '';
     if (d.content && d.content.length) {
-      for (var i = 0; i < d.content.length; i++) {
-        if (d.content[i].type === 'text') { text = d.content[i].text; break; }
+      for (var i = d.content.length - 1; i >= 0; i--) {
+        if (d.content[i].type === 'text' && d.content[i].text && d.content[i].text.trim().length > 10) {
+          text = d.content[i].text;
+          break;
+        }
       }
     }
-    text = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(text);
+    // 清除 markdown code fence
+    text = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    // 找出 JSON 陣列
+    var start = text.indexOf('[');
+    var end = text.lastIndexOf(']');
+    if (start >= 0 && end > start) text = text.slice(start, end + 1);
+    var hotels = JSON.parse(text);
+    // 確保每筆資料都有 photos 陣列
+    for (var j = 0; j < hotels.length; j++) {
+      if (!hotels[j].photos || !Array.isArray(hotels[j].photos)) hotels[j].photos = [];
+    }
+    return hotels;
   })
-  .catch(function() { return getFallback(); });
+  .catch(function(err) {
+    console.warn('Notion load failed, using fallback:', err);
+    return getFallback();
+  });
 }
 
 function getFallback() {
   return [
-    {id:'hotel1',name:'Hotel1',type:'獨棟民宿',dogSize:'小',rating:4,price:'100',furniture:'可',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'新北市',dogArea:'否'},
-    {id:'hotel2',name:'Hotel2',type:'營區',dogSize:'大、中、小',rating:5,price:'免費',furniture:'否',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'新北市',dogArea:'是'},
-    {id:'s1',name:'汪汪漫旅 · 宜蘭民宿',type:'獨棟民宿',dogSize:'大、中、小',rating:4.8,price:'2800',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'宜蘭縣',dogArea:'是'},
-    {id:'s2',name:'毛孩天堂 · 花蓮山莊',type:'渡假木屋',dogSize:'中、小',rating:4.5,price:'3500',furniture:'可',lawn:'有',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'花蓮市',dogArea:'是'},
-    {id:'s3',name:'森林小屋',type:'渡假木屋',dogSize:'大、中、小',rating:4.7,price:'4200',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'否',bowl:'是',address:'南投縣',dogArea:'是'},
-    {id:'s4',name:'海邊狗狗民宿',type:'獨棟民宿',dogSize:'小',rating:4.3,price:'1800',furniture:'否',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'屏東縣',dogArea:'否'}
+    {id:'hotel1',name:'Hotel1',type:'獨棟民宿',dogSize:'小',rating:4,price:'100',furniture:'可',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'新北市',dogArea:'否',
+     photos:['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=420&fit=crop']},
+    {id:'hotel2',name:'Hotel2',type:'營區',dogSize:'大、中、小',rating:5,price:'免費',furniture:'否',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'新北市',dogArea:'是',
+     photos:['https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&h=420&fit=crop','https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&h=420&fit=crop']},
+    {id:'s1',name:'汪汪漫旅 · 宜蘭民宿',type:'獨棟民宿',dogSize:'大、中、小',rating:4.8,price:'2800',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'是',bowl:'是',address:'宜蘭縣',dogArea:'是',
+     photos:['https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=600&h=420&fit=crop']},
+    {id:'s2',name:'毛孩天堂 · 花蓮山莊',type:'渡假木屋',dogSize:'中、小',rating:4.5,price:'3500',furniture:'可',lawn:'有',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'花蓮市',dogArea:'是',
+     photos:['https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&h=420&fit=crop']},
+    {id:'s3',name:'森林小屋',type:'渡假木屋',dogSize:'大、中、小',rating:4.7,price:'4200',furniture:'可',lawn:'有',park:'是',dogpark:'是',restaurant:'否',bowl:'是',address:'南投縣',dogArea:'是',
+     photos:['https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&h=420&fit=crop']},
+    {id:'s4',name:'海邊狗狗民宿',type:'獨棟民宿',dogSize:'小',rating:4.3,price:'1800',furniture:'否',lawn:'無',park:'是',dogpark:'否',restaurant:'是',bowl:'是',address:'屏東縣',dogArea:'否',
+     photos:['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=420&fit=crop']}
   ];
+}
+
+/* 取得旅宿的封面照片（第一張），沒有就用備用 */
+function coverImg(h, idx) {
+  if (h.photos && h.photos.length > 0) {
+    var url = h.photos[0];
+    // Notion signed URL 是 https:// 開頭
+    if (url && url.indexOf('https://') === 0) return url;
+  }
+  return fallbackImgs[idx % fallbackImgs.length];
+}
+
+/* 取得所有照片清單（用於詳細頁輪播），不足 4 張就補備用圖 */
+function allImgs(h, idx) {
+  var result = [];
+  if (h.photos && h.photos.length > 0) {
+    for (var i = 0; i < h.photos.length; i++) {
+      var url = h.photos[i];
+      if (url && url.indexOf('https://') === 0) result.push(url);
+    }
+  }
+  // 補到至少 1 張
+  if (result.length === 0) result.push(fallbackImgs[idx % fallbackImgs.length]);
+  return result;
 }
 
 function paws(r) {
@@ -427,14 +485,14 @@ function esc(s) {
 }
 
 function makeCard(h, i) {
-  var img = dogImages[i % dogImages.length];
+  var img = coverImg(h, i);
   var tags = '';
   if (h.dogArea === '是') tags += '<span class="tag tag-green">全區落地</span>';
   if (h.lawn === '有') tags += '<span class="tag tag-green">有草地</span>';
   if (h.dogpark === '是') tags += '<span class="tag tag-green">狗公園</span>';
   tags += '<span class="tag tag-type">' + h.type + '</span>';
   return '<div class="card" onclick="showDetail(\'' + esc(h.id) + '\')">'
-    + '<div class="card-img"><img src="' + img + '" alt="' + esc(h.name) + '" loading="lazy" onerror="this.parentElement.innerHTML=\'🐕\'"></div>'
+    + '<div class="card-img"><img src="' + img + '" alt="' + esc(h.name) + '" loading="lazy" onerror="this.src=\'' + fallbackImgs[i % fallbackImgs.length] + '\'"></div>'
     + '<div class="card-body">'
     + '<div class="card-top"><div class="card-name">' + h.name + '</div><div class="card-rating">🐾 ' + h.rating + '</div></div>'
     + '<div class="card-location">' + h.address + '</div>'
@@ -443,7 +501,7 @@ function makeCard(h, i) {
 }
 
 function makeResult(h, i) {
-  var img = dogImages[i % dogImages.length];
+  var img = coverImg(h, i);
   var feats = '';
   if (h.dogSize) feats += '<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg>接受：' + h.dogSize + '</div>';
   if (h.dogArea === '是') feats += '<div class="feature-row"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg>公共區域可落地</div>';
@@ -456,7 +514,7 @@ function makeResult(h, i) {
   if (h.park === '是') rtags += '<span class="tag tag-green">近公園</span>';
   if (h.restaurant === '是') rtags += '<span class="tag tag-green">可至餐廳</span>';
   return '<div class="result-card" onclick="showDetail(\'' + esc(h.id) + '\')">'
-    + '<img class="result-img" src="' + img + '" alt="' + esc(h.name) + '" loading="lazy">'
+    + '<img class="result-img" src="' + img + '" alt="' + esc(h.name) + '" loading="lazy" onerror="this.src=\'' + fallbackImgs[i % fallbackImgs.length] + '\'">'
     + '<div>'
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
     + '<div><div class="result-name">' + h.name + '</div><div class="result-sub">' + h.address + ' · ' + h.type + '</div></div>'
@@ -513,9 +571,14 @@ function showDetail(id) {
   if (!h) h = allHotels[0];
   if (!h) return;
 
-  var imgs = dogImages.slice(0, 4);
+  // 找這個旅宿在陣列中的 index（用於備用圖）
+  var hotelIdx = 0;
+  for (var ii = 0; ii < allHotels.length; ii++) { if (allHotels[ii].id === id) { hotelIdx = ii; break; } }
+  var imgs = allImgs(h, hotelIdx);
   var thumbs = imgs.map(function(u, i) {
-    return '<img class="thumb' + (i === 0 ? ' active' : '') + '" src="' + u + '" onclick="switchImg(this,\'' + u + '\')" alt="">';
+    return '<img class="thumb' + (i === 0 ? ' active' : '') + '" src="' + u + '" loading="lazy"'
+      + ' onclick="switchImg(this,\'' + u + '\')" alt=""'
+      + ' onerror="this.style.display=\'none\'">';
   }).join('');
 
   var feats = '';
@@ -538,7 +601,7 @@ function showDetail(id) {
   document.getElementById('detailContent').innerHTML =
     '<div class="detail-grid">'
     + '<div>'
-    + '<div class="main-img-wrap"><img class="main-img" id="mainImg" src="' + imgs[0] + '" alt="' + esc(h.name) + '"></div>'
+    + '<div class="main-img-wrap"><img class="main-img" id="mainImg" src="' + imgs[0] + '" alt="' + esc(h.name) + '" onerror="this.src=\'' + fallbackImgs[hotelIdx % fallbackImgs.length] + '\'"></div>'
     + '<div class="thumb-row">' + thumbs + '</div>'
     + '<div class="section-subtitle">關於這個地方</div>'
     + '<p style="font-size:13px;color:var(--text-mid);line-height:1.8">' + h.name + '是一個' + h.type + '，接受' + h.dogSize + '的狗狗入住。'
