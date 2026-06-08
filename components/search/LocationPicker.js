@@ -4,7 +4,7 @@ export default function LocationPicker({ value, onChange }) {
   return (
     <div>
       <p style={{ fontSize: 13, color: 'var(--text-mid)', marginBottom: 16 }}>選擇目的地縣市</p>
-      <div style={GRID}>
+      <div className="loc-picker-grid">
         {TW_CITIES.map(city => (
           <button
             key={city}

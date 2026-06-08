@@ -27,7 +27,7 @@ export default function PartnerPage() {
       {/* Benefits */}
       <div style={SECTION}>
         <h2 style={SECTION_TITLE}>為什麼選擇 together？</h2>
-        <div style={BENEFIT_GRID}>
+        <div className="partner-benefit-grid">
           {BENEFITS.map(b => (
             <div key={b.title} style={BENEFIT_CARD}>
               <div style={{ fontSize:36, marginBottom:12 }}>{b.icon}</div>

@@ -18,7 +18,7 @@ export default function SearchPopup({ onClose, onSearch }) {
 
   return (
     <div style={OVERLAY} onClick={onClose}>
-      <div style={MODAL} onClick={e => e.stopPropagation()}>
+      <div className="search-popup-modal" onClick={e => e.stopPropagation()}>
         {/* Tab bar */}
         <div style={TAB_BAR}>
           {TABS.map((t, i) => (
