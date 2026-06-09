@@ -117,9 +117,9 @@ export async function getStaticProps() {
   try {
     const { fetchHotels } = await import('../lib/notion');
     const hotels = await fetchHotels();
-    return { props: { hotels }, revalidate: 60 }; // 60s ISR: Notion 更新後快速反映
+    return { props: { hotels }, revalidate: 1800 }; // 每半小時更新
   } catch {
-    return { props: { hotels: FALLBACK_HOTELS }, revalidate: 60 };
+    return { props: { hotels: FALLBACK_HOTELS }, revalidate: 1800 };
   }
 }
 

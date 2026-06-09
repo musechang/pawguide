@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end();
   try {
     const hotels = await fetchHotels();
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate');
     res.json({ hotels });
   } catch (err) {
     console.error('[API] /api/hotels error:', err);

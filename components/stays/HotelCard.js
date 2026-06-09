@@ -33,7 +33,7 @@ export default function HotelCard({ hotel, index = 0 }) {
           <div style={NAME}>{hotel.name}</div>
           <div style={RATING}>🐾 {hotel.rating}</div>
         </div>
-        <div style={LOC}>{hotel.address} · {hotel.type}</div>
+        <div style={LOC}>{hotel.address?.startsWith("http") ? "" : hotel.address}{hotel.address && !hotel.address.startsWith("http") && hotel.type ? " · " : ""}{hotel.type}</div>
         <div style={TAGS}>
           {hotel.dogArea === '是' && <span className="tag tag-green">全區落地</span>}
           {hotel.lawn   === '有' && <span className="tag tag-green">有草地</span>}

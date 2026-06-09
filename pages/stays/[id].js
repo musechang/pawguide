@@ -44,7 +44,7 @@ export default function StayDetailPage({ hotel }) {
           <div className="detail-panel">
             {/* Name + meta */}
             <h1 style={S.hotelName}>{hotel.name}</h1>
-            <div style={S.hotelSub}>{hotel.type}{hotel.type && hotel.address ? ' · ' : ''}{!hotel.address?.startsWith('http') ? hotel.address : ''}</div>
+            <div style={S.hotelSub}>{hotel.type}{hotel.type && hotel.address ? ' · ' : ''}{hotel.address}</div>
 
             {/* Rating */}
             <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
@@ -86,7 +86,7 @@ export default function StayDetailPage({ hotel }) {
             </button>
 
             {/* ── OpenStreetMap thumbnail ── */}
-            <MapThumbnail name={hotel.name} address={hotel.address} />
+            <MapThumbnail name={hotel.name} address={hotel.address} googleMapUrl={hotel.googleMapUrl} />
           </div>
         </div>
       </div>
@@ -159,11 +159,11 @@ export async function getStaticProps({ params }) {
     const { fetchHotels } = await import('../../lib/notion');
     const hotels = await fetchHotels();
     const hotel = hotels.find(h => h.id === params.id) || null;
-    return { props: { hotel }, revalidate: 3600 };
+    return { props: { hotel }, revalidate: 1800 };
   } catch {
     return {
       props: { hotel: FALLBACK_HOTELS.find(h => h.id === params.id) || null },
-      revalidate: 60,
+      revalidate: 1800,
     };
   }
 }

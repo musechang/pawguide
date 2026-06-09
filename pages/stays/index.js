@@ -100,9 +100,9 @@ export async function getStaticProps() {
   try {
     const { fetchHotels } = await import('../../lib/notion');
     const hotels = await fetchHotels();
-    return { props: { hotels }, revalidate: 3600 };
+    return { props: { hotels }, revalidate: 1800 };
   } catch {
-    return { props: { hotels: FALLBACK_HOTELS }, revalidate: 60 };
+    return { props: { hotels: FALLBACK_HOTELS }, revalidate: 1800 };
   }
 }
 

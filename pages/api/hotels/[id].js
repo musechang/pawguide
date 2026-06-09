@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   try {
     const hotel = await fetchHotelById(id);
     if (!hotel) return res.status(404).json({ error: 'Not found' });
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate');
     res.json({ hotel });
   } catch {
     const hotel = FALLBACK_HOTELS.find(h => h.id === id) || null;
