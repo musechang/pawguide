@@ -8,10 +8,10 @@ import { FALLBACK_HOTELS } from '../lib/notion';
 
 export default function HomePage({ hotels }) {
   const router = useRouter();
-  const { locLabel, dateLabel, guestLabel } = useSearchDisplay();
+  const { locLabel, guestLabel } = useSearchDisplay();  // 移除 dateLabel
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const nearby  = hotels.slice(0, 4);
+  const nearby   = hotels.slice(0, 4);
   const largeDog = hotels.filter(h => h.dogSize?.includes('大')).slice(0, 4);
 
   return (
@@ -20,23 +20,22 @@ export default function HomePage({ hotels }) {
       <div className="hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/assets/hero.png" alt=""
-          style={{ position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top' }}
-          onError={e => e.target.style.display='none'} />
-        <div style={{ position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(28,60,42,.30) 0%,rgba(28,60,42,.10) 50%,rgba(250,248,244,.95) 100%)' }} />
+          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center top' }}
+          onError={e => e.target.style.display = 'none'} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg,rgba(28,60,42,.25) 0%,rgba(28,60,42,.08) 45%,rgba(250,248,244,.96) 100%)' }} />
 
-        <h1 className="hero-title">要去，一起去</h1>
+        <h1 className="hero-title">毛孩指南</h1>
 
-        <div className="hero-search-wrap">
+        {/* Search bar — 往下移 56px，日期欄位移除 */}
+        <div className="hero-search-wrap" style={{ marginTop: 80 }}>
           <div className="hero-search-bar">
+            {/* 地點 */}
             <button className="hero-search-field" onClick={() => setSearchOpen(true)}>
               <span style={LBL}>地點</span>
               <span style={VAL}>{locLabel}</span>
             </button>
-            <button className="hero-search-field hide-sm" onClick={() => setSearchOpen(true)}>
-              <span style={LBL}>日期</span>
-              <span style={VAL}>{dateLabel}</span>
-            </button>
-            <button className="hero-search-field hide-sm" onClick={() => setSearchOpen(true)}>
+            {/* 旅客與毛孩 — 日期欄已移除 */}
+            <button className="hero-search-field" onClick={() => setSearchOpen(true)}>
               <span style={LBL}>旅客與毛孩</span>
               <span style={VAL}>{guestLabel}</span>
             </button>
@@ -70,7 +69,13 @@ export default function HomePage({ hotels }) {
         </div>
       </section>
 
-      {searchOpen && <SearchPopup onClose={() => setSearchOpen(false)} onSearch={() => { setSearchOpen(false); router.push('/stays'); }} />}
+      {searchOpen && (
+        <SearchPopup
+          onClose={() => setSearchOpen(false)}
+          onSearch={() => { setSearchOpen(false); router.push('/stays'); }}
+          hideDate
+        />
+      )}
     </div>
   );
 }
@@ -87,6 +92,6 @@ export async function getStaticProps() {
   }
 }
 
-const LBL = { fontSize:10, color:'var(--text-light)', display:'block', marginBottom:3, fontWeight:600, letterSpacing:'.4px', textTransform:'uppercase' };
-const VAL = { fontSize:14, color:'var(--text-dark)', fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'100%' };
-const SEE_ALL = { fontSize:13, color:'var(--green-dark)', fontWeight:600, textDecoration:'none' };
+const LBL     = { fontSize:10, color:'var(--text-light)', display:'block', marginBottom:3, fontWeight:600, letterSpacing:'.4px', textTransform:'uppercase' };
+const VAL     = { fontSize:14, color:'var(--text-dark)', fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'100%' };
+const SEE_ALL = { fontSize:13, color:'var(--green-dark)', fontWeight:600 };

@@ -2,15 +2,15 @@ import Layout from '../../components/layout/Layout';
 
 const STEPS = [
   { num:'01', title:'填寫申請表單', desc:'告訴我們你的住宿基本資訊、地點、接受的狗狗大小，以及你提供的寵物友善設施。' },
-  { num:'02', title:'together 審核', desc:'我們的審核團隊會在 5 個工作天內聯繫你，確認你的住宿符合我們的狗狗友善標準。' },
+  { num:'02', title:'PawGuide 審核', desc:'我們的審核團隊會在 5 個工作天內聯繫你，確認你的住宿符合我們的狗狗友善標準。' },
   { num:'03', title:'完成設定', desc:'審核通過後，我們會協助你完善住宿頁面，包含照片上傳、設施標記等。' },
-  { num:'04', title:'開始接待毛孩旅客', desc:'你的住宿將出現在 together 平台上，開始接觸數千位帶狗旅行的旅客！' },
+  { num:'04', title:'開始接待毛孩旅客', desc:'你的住宿將出現在 PawGuide 平台上，開始接觸數千位帶狗旅行的旅客！' },
 ];
 
 const BENEFITS = [
-  { icon:'🐾', title:'接觸精準客群', desc:'together 的旅客都是帶狗旅行的主人，他們對寵物友善住宿有強烈需求。' },
+  { icon:'🐾', title:'接觸精準客群', desc:'PawGuide 的旅客都是帶狗旅行的主人，他們對寵物友善住宿有強烈需求。' },
   { icon:'📸', title:'免費頁面建置', desc:'我們協助你建立完整的住宿頁面，包含照片、設施標記與評分系統。' },
-  { icon:'⭐', title:'評分認證系統', desc:'通過 together 認證的住宿，在旅客心中更具信任感與吸引力。' },
+  { icon:'⭐', title:'評分認證系統', desc:'通過 PawGuide 認證的住宿，在旅客心中更具信任感與吸引力。' },
   { icon:'📊', title:'數據分析', desc:'查看你的住宿瀏覽次數、旅客偏好與詢問量，優化你的服務。' },
 ];
 
@@ -19,14 +19,14 @@ export default function PartnerPage() {
     <div>
       {/* Hero */}
       <div style={HERO}>
-        <h1 style={HERO_TITLE}>成為 together 合作旅宿</h1>
+        <h1 style={HERO_TITLE}>成為 PawGuide 合作旅宿</h1>
         <p style={HERO_SUB}>加入全台最大的狗狗友善住宿平台，接觸數千位帶狗旅行的旅客</p>
         <a href="#apply" style={CTA_BTN}>立即申請合作</a>
       </div>
 
       {/* Benefits */}
       <div style={SECTION}>
-        <h2 style={SECTION_TITLE}>為什麼選擇 together？</h2>
+        <h2 style={SECTION_TITLE}>為什麼選擇 PawGuide？</h2>
         <div className="partner-benefit-grid">
           {BENEFITS.map(b => (
             <div key={b.title} style={BENEFIT_CARD}>

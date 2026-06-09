@@ -27,7 +27,7 @@ export default function AuthForm({ defaultTab = 'login', onSuccess }) {
       <div style={{ textAlign:'center', marginBottom:24 }}>
         <div style={{ fontSize:32, marginBottom:8 }}>🐾</div>
         <h2 style={{ fontFamily:'Noto Serif TC,serif', fontSize:22, fontWeight:700 }}>
-          {tab === 'login' ? '歡迎回來' : '加入 together'}
+          {tab === 'login' ? '歡迎回來' : '加入 PawGuide'}
         </h2>
         <p style={{ fontSize:13, color:'var(--text-light)', marginTop:4 }}>帶著你的毛孩一起旅行</p>
       </div>

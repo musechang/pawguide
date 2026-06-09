@@ -4,6 +4,19 @@ import { useRouter } from 'next/router';
 import { useAuth, useSearchDisplay } from '../../lib/hooks';
 import SearchPopup from '../search/SearchPopup';
 
+function PawGuideLogo({ size = 36 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="10" fill="#1C3C2A"/>
+      <ellipse cx="20" cy="23" rx="7" ry="6" fill="white" opacity="0.95"/>
+      <ellipse cx="13" cy="17" rx="2.8" ry="2.5" fill="white" opacity="0.95"/>
+      <ellipse cx="18" cy="14.5" rx="2.8" ry="2.5" fill="white" opacity="0.95"/>
+      <ellipse cx="23" cy="14.5" rx="2.8" ry="2.5" fill="white" opacity="0.95"/>
+      <ellipse cx="28" cy="17" rx="2.8" ry="2.5" fill="white" opacity="0.95"/>
+    </svg>
+  );
+}
+
 export default function Navbar({ hideSearch = false }) {
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -14,24 +27,36 @@ export default function Navbar({ hideSearch = false }) {
   const isHome = router.pathname === '/';
 
   useEffect(() => {
-    const fn = (e) => { if (userRef.current && !userRef.current.contains(e.target)) setUserMenuOpen(false); };
+    const fn = (e) => {
+      if (userRef.current && !userRef.current.contains(e.target)) setUserMenuOpen(false);
+    };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
+  const showSearch = !isHome && !hideSearch;
+
   return (
     <>
       <nav className="nav">
+        {/* ── Logo ── */}
         <Link href="/" className="nav-logo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/logo.png" alt="together" width={36} height={36}
+          <img
+            src="/assets/logo.png"
+            alt="PawGuide"
+            width={36} height={36}
             style={{ borderRadius:8, objectFit:'cover' }}
-            onError={e => e.target.style.display='none'} />
-          <span className="nav-logo-text">together</span>
+            onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='block'; }}
+          />
+          <span style={{ display:'none' }}><PawGuideLogo size={36} /></span>
+          <span className="nav-logo-text" style={{ fontWeight:700, fontSize:20, color:'var(--green-dark)' }}>
+            PawGuide
+          </span>
         </Link>
 
-        {!isHome && !hideSearch && (
-          <button onClick={() => setSearchOpen(true)} className="nav-compact-bar">
+        {/* ── Desktop compact search bar (hidden on home, hidden on mobile via CSS) ── */}
+        {showSearch && (
+          <button onClick={() => setSearchOpen(true)} className="nav-compact-bar nav-search-desktop">
             <span className="nav-compact-field">
               <small style={LBL}>地點</small>
               <span style={VAL}>{locLabel}</span>
@@ -52,37 +77,56 @@ export default function Navbar({ hideSearch = false }) {
           </button>
         )}
 
+        {/* ── Right side ── */}
         <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
-          {!user && <Link href="/account" style={LOGIN_BTN}>登入</Link>}
-          <div ref={userRef} style={{ position:'relative' }}>
-            <button onClick={() => setUserMenuOpen(v => !v)} style={AVATAR_BTN} aria-label="User menu">
-              {user?.avatar
-                ? <img src={user.avatar} alt="" width={32} height={32} style={{ borderRadius:'50%', objectFit:'cover' }} />
-                : <span style={{ fontSize:18 }}>🐕</span>
-              }
+
+          {/* Mobile search icon — only shown on non-home, mobile breakpoint */}
+          {showSearch && (
+            <button
+              className="nav-search-mobile"
+              onClick={() => setSearchOpen(true)}
+              aria-label="搜尋"
+              style={MOBILE_SEARCH_BTN}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-dark)" strokeWidth="2.2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
             </button>
-            {userMenuOpen && (
-              <div style={USER_MENU}>
-                {user ? (
-                  <>
-                    <div style={MENU_NAME}>{user.name}</div>
-                    <Link href="/account" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>個人資料</Link>
-                    <Link href="/account?tab=favourites" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>我的收藏</Link>
-                    <Link href="/account?tab=reviews" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>我的評論</Link>
-                    <hr style={{ margin:'8px 0', border:'none', borderTop:'1px solid var(--border)' }} />
-                    <button style={{ ...MENU_ITEM, width:'100%', textAlign:'left', cursor:'pointer', border:'none', background:'none' }}
-                      onClick={() => { logout(); setUserMenuOpen(false); }}>登出</button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/account" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>登入</Link>
-                    <Link href="/account?tab=signup" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>註冊</Link>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-          <button style={HAMBURGER_BTN} aria-label="Menu">
+          )}
+
+          {/* Auth: show login button when logged out, avatar when logged in */}
+          {!user ? (
+            <Link href="/account" style={LOGIN_BTN}>登入</Link>
+          ) : (
+            <div ref={userRef} style={{ position:'relative' }}>
+              <button
+                onClick={() => setUserMenuOpen(v => !v)}
+                style={AVATAR_BTN}
+                aria-label="帳號選單"
+              >
+                {user.avatar
+                  ? <img src={user.avatar} alt="" width={32} height={32} style={{ borderRadius:'50%', objectFit:'cover' }} />
+                  : <span style={{ fontSize:18 }}>🐕</span>
+                }
+              </button>
+              {userMenuOpen && (
+                <div style={USER_MENU}>
+                  <div style={MENU_NAME}>{user.name}</div>
+                  <Link href="/account"               style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>個人資料</Link>
+                  <Link href="/account?tab=favourites" style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>我的收藏</Link>
+                  <Link href="/account?tab=reviews"    style={MENU_ITEM} onClick={() => setUserMenuOpen(false)}>我的評論</Link>
+                  <hr style={{ margin:'8px 0', border:'none', borderTop:'1px solid var(--border)' }} />
+                  <button
+                    style={{ ...MENU_ITEM, width:'100%', textAlign:'left', cursor:'pointer', border:'none', background:'none' }}
+                    onClick={() => { logout(); setUserMenuOpen(false); }}>
+                    登出
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <button style={HAMBURGER_BTN} aria-label="選單">
             <span style={BAR}/><span style={BAR}/><span style={BAR}/>
           </button>
         </div>
@@ -94,16 +138,55 @@ export default function Navbar({ hideSearch = false }) {
           onSearch={() => { setSearchOpen(false); router.push('/stays'); }}
         />
       )}
+
+      <style>{`
+        /* Desktop: show full search bar, hide icon */
+        .nav-search-desktop { display: flex; }
+        .nav-search-mobile  { display: none !important; }
+
+        /* Mobile (≤768px): hide full bar, show icon */
+        @media (max-width: 768px) {
+          .nav-search-desktop { display: none !important; }
+          .nav-search-mobile  { display: flex !important; }
+        }
+
+        /* Ensure logo text hidden on very small phones */
+        @media (max-width: 375px) { .nav-logo-text { display: none; } }
+      `}</style>
     </>
   );
 }
 
-const LBL = { fontSize:10, color:'var(--text-light)', display:'block', marginBottom:1 };
-const VAL = { fontSize:12, color:'var(--text-dark)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' };
-const LOGIN_BTN  = { fontSize:13, fontWeight:600, color:'var(--green-dark)', padding:'6px 14px', border:'1.5px solid var(--green-dark)', borderRadius:20 };
-const AVATAR_BTN = { width:36, height:36, borderRadius:'50%', background:'var(--green-light)', display:'flex', alignItems:'center', justifyContent:'center', border:'none', cursor:'pointer', overflow:'hidden' };
-const USER_MENU  = { position:'absolute', top:'calc(100% + 8px)', right:0, background:'var(--white)', border:'1px solid var(--border)', borderRadius:16, boxShadow:'var(--shadow-lg)', minWidth:180, padding:'8px 0', zIndex:400 };
-const MENU_NAME  = { padding:'8px 16px', fontSize:13, fontWeight:700, color:'var(--text-mid)', borderBottom:'1px solid var(--border)', marginBottom:4 };
-const MENU_ITEM  = { display:'block', padding:'10px 16px', fontSize:13, color:'var(--text-dark)' };
+const LBL  = { fontSize:10, color:'var(--text-light)', display:'block', marginBottom:1 };
+const VAL  = { fontSize:12, color:'var(--text-dark)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' };
+
+const LOGIN_BTN = {
+  fontSize:13, fontWeight:600, color:'var(--green-dark)',
+  padding:'7px 16px', border:'1.5px solid var(--green-dark)',
+  borderRadius:20, textDecoration:'none', whiteSpace:'nowrap',
+};
+const AVATAR_BTN = {
+  width:36, height:36, borderRadius:'50%',
+  background:'var(--green-light)',
+  display:'flex', alignItems:'center', justifyContent:'center',
+  border:'none', cursor:'pointer', overflow:'hidden',
+};
+const MOBILE_SEARCH_BTN = {
+  width:36, height:36, borderRadius:'50%',
+  background:'var(--green-light)',
+  display:'flex', alignItems:'center', justifyContent:'center',
+  border:'none', cursor:'pointer',
+};
+const USER_MENU = {
+  position:'absolute', top:'calc(100% + 8px)', right:0,
+  background:'var(--white)', border:'1px solid var(--border)',
+  borderRadius:16, boxShadow:'var(--shadow-lg)',
+  minWidth:180, padding:'8px 0', zIndex:400,
+};
+const MENU_NAME = {
+  padding:'8px 16px', fontSize:13, fontWeight:700,
+  color:'var(--text-mid)', borderBottom:'1px solid var(--border)', marginBottom:4,
+};
+const MENU_ITEM     = { display:'block', padding:'10px 16px', fontSize:13, color:'var(--text-dark)' };
 const HAMBURGER_BTN = { cursor:'pointer', padding:6, display:'flex', flexDirection:'column', gap:4, background:'none', border:'none' };
-const BAR = { width:20, height:2, background:'var(--text-dark)', display:'block', borderRadius:2 };
+const BAR           = { width:20, height:2, background:'var(--text-dark)', display:'block', borderRadius:2 };
