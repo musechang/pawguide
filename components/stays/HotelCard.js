@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useFavourites } from '../../lib/hooks';
+import PawRating from './PawRating';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=420&fit=crop';
 
@@ -31,7 +32,7 @@ export default function HotelCard({ hotel, index = 0 }) {
       <div style={BODY}>
         <div style={TOP}>
           <div style={NAME}>{hotel.name}</div>
-          <div style={RATING}>🐾 {hotel.rating}</div>
+          <div style={RATING}><PawRating rating={hotel.rating} size={12} /></div>
         </div>
         <div style={LOC}>{hotel.address?.startsWith("http") ? "" : hotel.address}{hotel.address && !hotel.address.startsWith("http") && hotel.type ? " · " : ""}{hotel.type}</div>
         <div style={TAGS}>

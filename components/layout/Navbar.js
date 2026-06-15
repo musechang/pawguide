@@ -125,7 +125,7 @@ export default function Navbar({ hideSearch = false }) {
 
 const LBL        = { fontSize: 10, color: 'var(--text-light)', display: 'block', marginBottom: 1 };
 const VAL        = { fontSize: 12, color: 'var(--text-dark)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
-const NAV_BTN    = { background: 'var(--green-dark)', padding: '8px 14px', borderRadius: '0 40px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 42, alignSelf: 'stretch' };
+const NAV_BTN    = { backgroundColor: 'var(--green-dark)', backgroundImage: 'none', padding: '8px 14px', borderRadius: '0 40px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 42, alignSelf: 'stretch' };
 const ICON_BTN   = { width: 36, height: 36, borderRadius: '50%', background: 'var(--green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' };
 const LOGIN_BTN  = { fontSize: 13, fontWeight: 600, color: 'var(--green-dark)', padding: '7px 16px', border: '1.5px solid var(--green-dark)', borderRadius: 20, textDecoration: 'none', whiteSpace: 'nowrap' };
 const AVATAR_BTN = { width: 36, height: 36, borderRadius: '50%', background: 'var(--green-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', overflow: 'hidden' };

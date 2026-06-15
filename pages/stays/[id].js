@@ -3,6 +3,7 @@ import PhotoGallery from '../../components/stays/PhotoGallery';
 import AmenityGrid from '../../components/stays/AmenityGrid';
 import ReviewSection from '../../components/stays/ReviewSection';
 import MapThumbnail from '../../components/stays/MapThumbnail';
+import PawRating from '../../components/stays/PawRating';
 import { useFavourites } from '../../lib/hooks';
 import { FALLBACK_HOTELS } from '../../lib/notion';
 import Link from 'next/link';
@@ -46,11 +47,10 @@ export default function StayDetailPage({ hotel }) {
             <h1 style={S.hotelName}>{hotel.name}</h1>
             <div style={S.hotelSub}>{hotel.type}{hotel.type && hotel.address ? ' · ' : ''}{hotel.address}</div>
 
-            {/* Rating */}
-            <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
-              <span>{'🐾'.repeat(Math.min(Math.floor(hotel.rating || 0), 5))}</span>
-              <strong style={{ fontSize:15 }}>{hotel.rating || '—'}</strong>
-              <span style={{ fontSize:12, color:'var(--text-light)' }}>(1000+ 評論)</span>
+            {/* Official PawGuide rating */}
+            <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+              <PawRating rating={hotel.rating} size={18} />
+              <span style={{ fontSize:12, color:'var(--text-light)' }}>PawGuide 官方評分</span>
             </div>
 
             {/* Price */}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useFavourites } from '../../lib/hooks';
+import PawRating from './PawRating';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=420&fit=crop';
 
@@ -53,7 +54,7 @@ export default function HotelCardRow({ hotel }) {
                 {hotel.type}
               </div>
             </div>
-            <div style={{ fontSize:13, fontWeight:700, flexShrink:0 }}>🐾 {hotel.rating || '—'}</div>
+            <div style={{ flexShrink:0 }}><PawRating rating={hotel.rating} size={12} /></div>
           </div>
 
           {/* Amenities — hide on xs */}

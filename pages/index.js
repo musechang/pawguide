@@ -30,7 +30,7 @@ export default function HomePage({ hotels }) {
           style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center top' }}
           onError={e => e.target.style.display = 'none'}
         />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg,rgba(28,60,42,.20) 0%,rgba(28,60,42,.05) 40%,rgba(250,248,244,.97) 100%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg,rgba(250,248,244,.55) 0%,rgba(250,248,244,.30) 35%,rgba(250,248,244,.97) 100%)' }} />
 
         <h1 className="hero-title">毛孩指南</h1>
 

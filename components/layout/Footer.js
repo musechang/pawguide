@@ -15,7 +15,7 @@ export default function Footer() {
           <img
             src="/assets/logo-footer.png"
             alt="PawGuide"
-            style={{ height: 32, width: 'auto', marginBottom: 12 }}
+            style={{ height: 22, maxWidth: 140, width: 'auto', objectFit: 'contain', marginBottom: 12 }}
             onError={e => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'block';
